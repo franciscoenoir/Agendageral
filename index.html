@@ -81,7 +81,7 @@
   .dc-act { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 8px; }
   .bsm { background: none; border: 0.5px solid var(--border); border-radius: var(--radius); padding: 3px 10px; font-size: 11px; cursor: pointer; color: var(--text2); font-family: inherit; }
   .bsm:hover { border-color: var(--border2); color: var(--text); }
-  .bsm.c{border-color:#5DCAA5;color:#0F6E56;} .bsm.e{border-color:var(--blue-mid);color:var(--blue);} .bsm.x{border-color:#F09595;color:#A32D2D;}
+  .bsm.c{border-color:#5DCAA5;color:#0F6E56;} .bsm.e{border-color:var(--blue-mid);color:var(--blue);} .bsm.x{border-color:#F09595;color:#A32D2D;} .bsm.g{border-color:#5DCAA5;color:#0F6E56;}
   .eform { margin-top: 10px; padding-top: 10px; border-top: 0.5px solid var(--border); display: flex; flex-direction: column; gap: 8px; }
   .er3 { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 7px; }
   .er2 { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
@@ -139,7 +139,10 @@
         <div class="fg"><label>Urgência</label><select id="fu"><option value="urgente">Urgente</option><option value="alta">Alta</option><option value="media" selected>Média</option><option value="baixa">Baixa</option></select></div>
       </div>
       <div class="r2">
+        <div class="fg"><label>Data de início</label><input type="date" id="fi"/></div>
         <div class="fg"><label>Data limite *</label><input type="date" id="fd"/></div>
+      </div>
+      <div class="r2">
         <div class="fg"><label>Responsável / Parte</label><input id="fr" placeholder="Ex: Aurora Alimentos"/></div>
       </div>
       <div class="fg"><label>Observações</label><textarea id="fo" placeholder="Detalhes, documentos necessários, contatos..."></textarea></div>
@@ -232,8 +235,8 @@ function gl(cid){return Array.from(document.querySelectorAll('#'+cid+' input')).
 function add(){
   const t=document.getElementById('ft').value.trim(),dt=document.getElementById('fd').value;
   if(!t||!dt){alert('Preencha o título e a data limite.');return;}
-  D.push({id:Date.now(),titulo:t,categoria:document.getElementById('fc').value,urgencia:document.getElementById('fu').value,data:dt,responsavel:document.getElementById('fr').value.trim(),obs:document.getElementById('fo').value.trim(),links:gl('fl'),status:'pendente',autoEscalado:false});
-  save();['ft','fo','fr'].forEach(id=>document.getElementById(id).value='');document.getElementById('fd').valueAsDate=hoje;document.getElementById('fl').innerHTML='';
+  D.push({id:Date.now(),titulo:t,categoria:document.getElementById('fc').value,urgencia:document.getElementById('fu').value,dataInicio:document.getElementById('fi').value,data:dt,responsavel:document.getElementById('fr').value.trim(),obs:document.getElementById('fo').value.trim(),links:gl('fl'),status:'pendente',autoEscalado:false});
+  save();['ft','fo','fr'].forEach(id=>document.getElementById(id).value='');document.getElementById('fd').valueAsDate=hoje;document.getElementById('fi').value='';document.getElementById('fl').innerHTML='';
   sv('lista',document.querySelector('.tab'));render();
 }
 function concluir(id){const d=D.find(x=>x.id===id);if(d){d.status=d.status==='concluido'?'pendente':'concluido';d.autoEscalado=false;save();render();}}
@@ -244,7 +247,7 @@ function se(id){
   const t=document.getElementById('et'+id).value.trim(),dt=document.getElementById('ed'+id).value;
   if(!t||!dt){alert('Preencha o título e a data limite.');return;}
   d.titulo=t;d.categoria=document.getElementById('ec'+id).value;d.urgencia=document.getElementById('eu'+id).value;
-  d.data=dt;d.responsavel=document.getElementById('er'+id).value.trim();d.obs=document.getElementById('eo'+id).value.trim();
+  d.dataInicio=document.getElementById('ei'+id).value;d.data=dt;d.responsavel=document.getElementById('er'+id).value.trim();d.obs=document.getElementById('eo'+id).value.trim();
   d.links=gl('el'+id);d.autoEscalado=false;save();eId=null;render();
 }
 function sf(f,el){fAtivo=f;document.querySelectorAll('.fb').forEach(b=>b.classList.remove('active'));el.classList.add('active');render();}
@@ -295,13 +298,24 @@ function pdf(){
     const r=dr(d.data);const pr=r<0?Math.abs(r)+'d atrasada':r===0?'Vence hoje':r+'d restantes';
     doc.setFont('helvetica','bold');doc.setFontSize(11);doc.text(d.titulo.substring(0,72),14,y);y+=6;
     doc.setFont('helvetica','normal');doc.setFontSize(9);
-    doc.text('Urgência: '+uL[d.urgencia]+'   Categoria: '+d.categoria+'   Prazo: '+pd(d.data).toLocaleDateString('pt-BR')+' ('+pr+')',14,y);y+=5;
+    const ini=d.dataInicio?'Início: '+pd(d.dataInicio).toLocaleDateString('pt-BR')+'   ':'';doc.text(ini+'Urgência: '+uL[d.urgencia]+'   Categoria: '+d.categoria+'   Limite: '+pd(d.data).toLocaleDateString('pt-BR')+' ('+pr+')',14,y);y+=5;
     if(d.responsavel){doc.text('Responsável: '+d.responsavel,14,y);y+=5;}
     if(d.obs){const l=doc.splitTextToSize('Obs: '+d.obs,180);doc.text(l,14,y);y+=l.length*4+2;}
     if(d.links&&d.links.length){doc.text('Links: '+d.links.join(' | ').substring(0,100),14,y);y+=5;}
     doc.setDrawColor(210,210,210);doc.line(14,y,196,y);y+=5;
   });
   doc.save('demandas-'+hoje.toISOString().split('T')[0]+'.pdf');
+}
+
+function gcal(id){
+  const d=D.find(x=>x.id===id);if(!d)return;
+  const fmt=s=>{if(!s)return'';return s.replace(/-/g,'');};
+  const ini=d.dataInicio?fmt(d.dataInicio):fmt(d.data);
+  const fim=fmt(d.data);
+  const titulo=encodeURIComponent(d.titulo);
+  const det=encodeURIComponent((d.obs||'')+(d.responsavel?'\nResponsável: '+d.responsavel:'')+(d.categoria?'\nCategoria: '+d.categoria:''));
+  const url='https://calendar.google.com/calendar/render?action=TEMPLATE&text='+titulo+'&dates='+ini+'/'+fim+'&details='+det;
+  window.open(url,'_blank');
 }
 function render(){
   autoP();
@@ -329,8 +343,8 @@ function render(){
     const cO=CATS.map(c=>`<option${c===d.categoria?' selected':''}>${c}</option>`).join('');
     const uO=URGS.map(u=>`<option value="${u.v}"${u.v===d.urgencia?' selected':''}>${u.l}</option>`).join('');
     const lH=lk.map(l=>`<div class="lrow"><input type="text" value="${l.replace(/"/g,'&quot;')}"/><button class="btn-rm" onclick="this.parentElement.remove()">×</button></div>`).join('');
-    const ef=ed?`<div class="eform"><div class="er3"><div class="fg"><label>Título *</label><input id="et${d.id}" value="${d.titulo.replace(/"/g,'&quot;')}"/></div><div class="fg"><label>Categoria</label><select id="ec${d.id}">${cO}</select></div><div class="fg"><label>Urgência</label><select id="eu${d.id}">${uO}</select></div></div><div class="er2"><div class="fg"><label>Data limite *</label><input type="date" id="ed${d.id}" value="${d.data}"/></div><div class="fg"><label>Responsável</label><input id="er${d.id}" value="${(d.responsavel||'').replace(/"/g,'&quot;')}"/></div></div><div class="fg"><label>Observações</label><textarea id="eo${d.id}">${d.obs||''}</textarea></div><div class="fg"><label>Links</label><div class="llist" id="el${d.id}">${lH}</div><button class="btn-la" onclick="al('el${d.id}')">+ Adicionar link</button></div><div class="eact"><button class="btns" onclick="se(${d.id})">Salvar alterações</button><button class="btnc" onclick="te(${d.id})">Cancelar</button></div></div>`:'';
-    return`<div class="dc ${atr?'atr':''} ${conc?'conc':''} ${!atr&&!conc?d.urgencia:''}" id="c${d.id}"><div class="dc-top"><div class="dc-title ${conc?'rs':''}">${d.titulo}</div><div class="badges">${conc?'<span class="badge b-conc">Concluída</span>':atr?'<span class="badge b-atr">Atrasada</span>':`<span class="badge b-${d.urgencia}">${uL[d.urgencia]}</span>`}${d.autoEscalado&&!conc?'<span class="badge b-auto">auto</span>':''}</div></div><div class="dc-meta"><span>📅 ${df} — ${pr}</span><span>📂 ${d.categoria}</span>${d.responsavel?`<span>👤 ${d.responsavel}</span>`:''}</div>${d.obs&&!ed?`<div class="dc-obs">💬 ${d.obs}</div>`:''}${lk.length&&!ed?`<div class="dc-links">${lk.map(l=>`<a class="dc-link" href="${l}" target="_blank">🔗 ${l.replace(/^https?:\/\//,'').substring(0,38)}</a>`).join('')}</div>`:''}<div class="dc-act"><button class="bsm c" onclick="concluir(${d.id})">${conc?'↩ Reabrir':'✓ Concluir'}</button><button class="bsm e" onclick="te(${d.id})">${ed?'✕ Fechar':'✎ Editar'}</button><button class="bsm x" onclick="excluir(${d.id})">✕ Excluir</button></div>${ef}</div>`;
+    const ef=ed?`<div class="eform"><div class="er3"><div class="fg"><label>Título *</label><input id="et${d.id}" value="${d.titulo.replace(/"/g,'&quot;')}"/></div><div class="fg"><label>Categoria</label><select id="ec${d.id}">${cO}</select></div><div class="fg"><label>Urgência</label><select id="eu${d.id}">${uO}</select></div></div><div class="er2"><div class="fg"><label>Data de início</label><input type="date" id="ei${d.id}" value="${d.dataInicio||''}" /></div><div class="fg"><label>Data limite *</label><input type="date" id="ed${d.id}" value="${d.data}"/></div></div><div class="er2"><div class="fg"><label>Responsável</label><input id="er${d.id}" value="${(d.responsavel||'').replace(/"/g,'&quot;')}"/></div></div><div class="fg"><label>Observações</label><textarea id="eo${d.id}">${d.obs||''}</textarea></div><div class="fg"><label>Links</label><div class="llist" id="el${d.id}">${lH}</div><button class="btn-la" onclick="al('el${d.id}')">+ Adicionar link</button></div><div class="eact"><button class="btns" onclick="se(${d.id})">Salvar alterações</button><button class="btnc" onclick="te(${d.id})">Cancelar</button></div></div>`:'';
+    return`<div class="dc ${atr?'atr':''} ${conc?'conc':''} ${!atr&&!conc?d.urgencia:''}" id="c${d.id}"><div class="dc-top"><div class="dc-title ${conc?'rs':''}">${d.titulo}</div><div class="badges">${conc?'<span class="badge b-conc">Concluída</span>':atr?'<span class="badge b-atr">Atrasada</span>':`<span class="badge b-${d.urgencia}">${uL[d.urgencia]}</span>`}${d.autoEscalado&&!conc?'<span class="badge b-auto">auto</span>':''}</div></div><div class="dc-meta">${d.dataInicio?`<span>🗓 Início: ${pd(d.dataInicio).toLocaleDateString('pt-BR',{day:'2-digit',month:'short'})}</span>`:''}<span>📅 Limite: ${df} — ${pr}</span><span>📂 ${d.categoria}</span>${d.responsavel?`<span>👤 ${d.responsavel}</span>`:''}</div>${d.obs&&!ed?`<div class="dc-obs">💬 ${d.obs}</div>`:''}${lk.length&&!ed?`<div class="dc-links">${lk.map(l=>`<a class="dc-link" href="${l}" target="_blank">🔗 ${l.replace(/^https?:\/\//,'').substring(0,38)}</a>`).join('')}</div>`:''}<div class="dc-act"><button class="bsm c" onclick="concluir(${d.id})">${conc?'↩ Reabrir':'✓ Concluir'}</button><button class="bsm e" onclick="te(${d.id})">${ed?'✕ Fechar':'✎ Editar'}</button><button class="bsm x" onclick="excluir(${d.id})">✕ Excluir</button><button class="bsm g" onclick="gcal(${d.id})">📅 Google Agenda</button></div>${ef}</div>`;
   }).join('');
 }
 render();
