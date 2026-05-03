@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AgendaController;
 use App\Http\Controllers\CategoriaController;
+use App\Http\Controllers\RecebimentoController;
 use App\Http\Controllers\HistoricoController;
 use App\Http\Controllers\PastaController;
 use App\Http\Controllers\LembreteController;
@@ -39,6 +40,10 @@ Route::middleware('auth')->group(function () {
 
     Route::post('categorias', [CategoriaController::class, 'store'])->name('categorias.store');
     Route::delete('categorias/{categoria}', [CategoriaController::class, 'destroy'])->name('categorias.destroy');
+
+    Route::get('recebimentos', [RecebimentoController::class, 'index'])->name('recebimentos');
+    Route::post('recebimentos/{demanda}', [RecebimentoController::class, 'store'])->name('recebimentos.store');
+    Route::delete('recebimentos/pagamentos/{pagamento}', [RecebimentoController::class, 'destroy'])->name('recebimentos.destroy');
 
     Route::get('lembretes', [LembreteController::class, 'index'])->name('lembretes');
     Route::post('lembretes', [LembreteController::class, 'store'])->name('lembretes.store');

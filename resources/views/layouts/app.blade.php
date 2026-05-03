@@ -41,6 +41,10 @@
                class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium {{ request()->routeIs('historico*') ? 'bg-blue-600 text-white' : 'text-gray-300 hover:bg-gray-800' }}">
                 🗂️ Histórico
             </a>
+            <a href="{{ route('recebimentos') }}"
+               class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium {{ request()->routeIs('recebimentos*') ? 'bg-blue-600 text-white' : 'text-gray-300 hover:bg-gray-800' }}">
+                💰 Valores a Receber
+            </a>
             <hr class="my-3 border-gray-700">
             <a href="{{ route('configuracoes') }}"
                class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium {{ request()->routeIs('configuracoes*') ? 'bg-blue-600 text-white' : 'text-gray-300 hover:bg-gray-800' }}">

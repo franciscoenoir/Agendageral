@@ -13,7 +13,7 @@ class Demanda extends Model
 
     protected $fillable = [
         'pasta_id', 'titulo', 'categoria', 'urgencia', 'status',
-        'data_inicio', 'data_limite', 'responsavel',
+        'data_inicio', 'data_limite', 'responsavel', 'valor',
         'observacoes', 'auto_escalado', 'google_event_id',
     ];
 
@@ -50,6 +50,11 @@ class Demanda extends Model
     public function links(): HasMany
     {
         return $this->hasMany(DemandaLink::class);
+    }
+
+    public function pagamentos(): HasMany
+    {
+        return $this->hasMany(Pagamento::class);
     }
 
     public function pasta()

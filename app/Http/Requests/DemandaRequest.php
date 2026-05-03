@@ -16,11 +16,12 @@ class DemandaRequest extends FormRequest
         return [
             'pasta_id'    => 'nullable|exists:pastas,id',
             'titulo'      => 'required|string|max:255',
-            'categoria'   => 'required|in:Engenharia,Firedrill,Rosa Garden,Particular,Família,Administrativo,Outro',
+            'categoria'   => 'required|string|max:100',
             'urgencia'    => 'required|in:urgente,alta,media,baixa',
             'data_inicio' => 'nullable|date',
             'data_limite' => 'required|date',
             'responsavel' => 'nullable|string|max:255',
+            'valor'       => 'nullable|numeric|min:0',
             'observacoes' => 'nullable|string',
             'links'       => 'nullable|array',
             'links.*.url' => 'required_with:links|url',
