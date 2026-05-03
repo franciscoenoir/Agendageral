@@ -57,6 +57,7 @@ class AgendaController extends Controller
                 'hoje'     => $dt->isToday(),
                 'fds'      => $dt->isWeekend(),
                 'demandas' => $mesDemandas->get($dt->toDateString(), collect()),
+                'mesAtual' => true,
             ];
         }
         // Completar última semana
