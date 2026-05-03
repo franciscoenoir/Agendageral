@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Demanda;
+use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class AgendaController extends Controller
 {
@@ -12,11 +14,13 @@ class AgendaController extends Controller
         return view('agenda.index');
     }
 
-    public function data(): JsonResponse
+    public function data(Request $request): JsonResponse
     {
+        $inicio = $request->input('inicio') ? Carbon::parse($request->input('inicio')) : today();
+        $fim    = $request->input('fim')    ? Carbon::parse($request->input('fim'))    : today()->addDays(6);
+
         $demandas = Demanda::pendentes()
-            ->whereBetween('data_limite', [today(), today()->addDays(6)])
-            ->with('links')
+            ->whereBetween('data_limite', [$inicio, $fim])
             ->orderBy('data_limite')
             ->get()
             ->map(fn($d) => [

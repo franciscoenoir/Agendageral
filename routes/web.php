@@ -1,6 +1,9 @@
 <?php
 
 use App\Http\Controllers\AgendaController;
+use App\Http\Controllers\HistoricoController;
+use App\Http\Controllers\PastaController;
+use App\Http\Controllers\LembreteController;
 use App\Http\Controllers\AlertaController;
 use App\Http\Controllers\ConfiguracaoController;
 use App\Http\Controllers\DemandaController;
@@ -25,6 +28,18 @@ Route::middleware('auth')->group(function () {
 
     Route::get('google/redirect', [GoogleController::class, 'redirect'])->name('google.redirect');
     Route::get('google/callback', [GoogleController::class, 'callback'])->name('google.callback');
+
+    Route::post('pastas', [PastaController::class, 'store'])->name('pastas.store');
+    Route::patch('pastas/{pasta}', [PastaController::class, 'update'])->name('pastas.update');
+    Route::delete('pastas/{pasta}', [PastaController::class, 'destroy'])->name('pastas.destroy');
+    Route::patch('demandas/{demanda}/pasta', [DemandaController::class, 'moverPasta'])->name('demandas.pasta');
+
+    Route::get('historico', [HistoricoController::class, 'index'])->name('historico');
+
+    Route::get('lembretes', [LembreteController::class, 'index'])->name('lembretes');
+    Route::post('lembretes', [LembreteController::class, 'store'])->name('lembretes.store');
+    Route::patch('lembretes/{lembrete}', [LembreteController::class, 'update'])->name('lembretes.update');
+    Route::delete('lembretes/{lembrete}', [LembreteController::class, 'destroy'])->name('lembretes.destroy');
 });
 
 Route::post('webhook/whatsapp', [WhatsAppController::class, 'webhook'])->name('webhook.whatsapp');

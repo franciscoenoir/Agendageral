@@ -33,6 +33,14 @@
                class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-300 hover:bg-gray-800">
                 ➕ Nova Demanda
             </a>
+            <a href="{{ route('lembretes') }}"
+               class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium {{ request()->routeIs('lembretes*') ? 'bg-blue-600 text-white' : 'text-gray-300 hover:bg-gray-800' }}">
+                🗒️ Lembretes
+            </a>
+            <a href="{{ route('historico') }}"
+               class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium {{ request()->routeIs('historico*') ? 'bg-blue-600 text-white' : 'text-gray-300 hover:bg-gray-800' }}">
+                🗂️ Histórico
+            </a>
             <hr class="my-3 border-gray-700">
             <a href="{{ route('configuracoes') }}"
                class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium {{ request()->routeIs('configuracoes*') ? 'bg-blue-600 text-white' : 'text-gray-300 hover:bg-gray-800' }}">

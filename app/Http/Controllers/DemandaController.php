@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\DemandaRequest;
 use App\Models\Demanda;
+use App\Models\Pasta;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 
@@ -11,7 +12,7 @@ class DemandaController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Demanda::with('links')->orderByRaw("
+        $query = Demanda::with('links', 'pasta')->orderByRaw("
             CASE urgencia
                 WHEN 'urgente' THEN 1
                 WHEN 'alta'    THEN 2
@@ -23,13 +24,13 @@ class DemandaController extends Controller
         $filtro = $request->get('filtro', 'todos');
 
         match ($filtro) {
-            'atrasadas' => $query->atrasadas(),
-            'urgentes'  => $query->urgentes(),
-            'hoje'      => $query->where('data_limite', today())->pendentes(),
-            'semana'    => $query->semana(),
-            'pendentes' => $query->pendentes(),
-            'concluidas'=> $query->where('status', 'concluido'),
-            default     => null,
+            'atrasadas'  => $query->atrasadas(),
+            'urgentes'   => $query->urgentes(),
+            'hoje'       => $query->where('data_limite', today())->pendentes(),
+            'semana'     => $query->semana(),
+            'pendentes'  => $query->pendentes(),
+            'concluidas' => $query->where('status', 'concluido'),
+            default      => null,
         };
 
         if ($busca = $request->get('busca')) {
@@ -45,49 +46,48 @@ class DemandaController extends Controller
         }
 
         $demandas = $query->get();
+        $pastas   = Pasta::orderBy('nome')->get();
 
         $stats = [
-            'total'    => Demanda::pendentes()->count(),
-            'urgentes' => Demanda::urgentes()->count(),
-            'atrasadas'=> Demanda::atrasadas()->count(),
-            'semana'   => Demanda::semana()->count(),
+            'total'     => Demanda::pendentes()->count(),
+            'urgentes'  => Demanda::urgentes()->count(),
+            'atrasadas' => Demanda::atrasadas()->count(),
+            'semana'    => Demanda::semana()->count(),
         ];
 
-        return view('demandas.index', compact('demandas', 'stats', 'filtro'));
+        return view('demandas.index', compact('demandas', 'stats', 'filtro', 'pastas'));
     }
 
     public function create()
     {
-        return view('demandas.create');
+        $pastas = Pasta::orderBy('nome')->get();
+        return view('demandas.create', compact('pastas'));
     }
 
     public function store(DemandaRequest $request)
     {
         $demanda = Demanda::create($request->except('links'));
-
         $this->syncLinks($demanda, $request->input('links', []));
-
         return redirect()->route('dashboard')->with('success', 'Demanda criada com sucesso.');
     }
 
     public function show(Demanda $demanda)
     {
-        $demanda->load('links');
+        $demanda->load('links', 'pasta');
         return view('demandas.show', compact('demanda'));
     }
 
     public function edit(Demanda $demanda)
     {
         $demanda->load('links');
-        return view('demandas.edit', compact('demanda'));
+        $pastas = Pasta::orderBy('nome')->get();
+        return view('demandas.edit', compact('demanda', 'pastas'));
     }
 
     public function update(DemandaRequest $request, Demanda $demanda)
     {
         $demanda->update($request->except('links'));
-
         $this->syncLinks($demanda, $request->input('links', []));
-
         return redirect()->route('dashboard')->with('success', 'Demanda atualizada.');
     }
 
@@ -101,8 +101,13 @@ class DemandaController extends Controller
     {
         $demanda->status = $demanda->status === 'concluido' ? 'pendente' : 'concluido';
         $demanda->saveQuietly();
-
         return back()->with('success', 'Status atualizado.');
+    }
+
+    public function moverPasta(Request $request, Demanda $demanda)
+    {
+        $demanda->updateQuietly(['pasta_id' => $request->input('pasta_id')]);
+        return response()->json(['ok' => true]);
     }
 
     public function exportPdf()
@@ -115,7 +120,6 @@ class DemandaController extends Controller
     private function syncLinks(Demanda $demanda, array $links): void
     {
         $demanda->links()->delete();
-
         foreach ($links as $link) {
             if (!empty($link['url'])) {
                 $demanda->links()->create([

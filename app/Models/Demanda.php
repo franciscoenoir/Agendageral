@@ -12,7 +12,7 @@ class Demanda extends Model
     use SoftDeletes;
 
     protected $fillable = [
-        'titulo', 'categoria', 'urgencia', 'status',
+        'pasta_id', 'titulo', 'categoria', 'urgencia', 'status',
         'data_inicio', 'data_limite', 'responsavel',
         'observacoes', 'auto_escalado', 'google_event_id',
     ];
@@ -50,6 +50,11 @@ class Demanda extends Model
     public function links(): HasMany
     {
         return $this->hasMany(DemandaLink::class);
+    }
+
+    public function pasta()
+    {
+        return $this->belongsTo(Pasta::class);
     }
 
     public function scopePendentes($query)

@@ -14,6 +14,7 @@ class DemandaRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'pasta_id'    => 'nullable|exists:pastas,id',
             'titulo'      => 'required|string|max:255',
             'categoria'   => 'required|in:Engenharia,Firedrill,Rosa Garden,Particular,Família,Administrativo,Outro',
             'urgencia'    => 'required|in:urgente,alta,media,baixa',

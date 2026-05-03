@@ -20,6 +20,18 @@
     <div class="bg-white rounded-xl shadow-sm p-6 space-y-4">
 
         <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Pasta</label>
+            <select name="pasta_id" class="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <option value="">— Sem pasta —</option>
+                @foreach($pastas as $pasta)
+                    <option value="{{ $pasta->id }}" {{ old('pasta_id', $demanda?->pasta_id) == $pasta->id ? 'selected' : '' }}>
+                        📁 {{ $pasta->nome }}
+                    </option>
+                @endforeach
+            </select>
+        </div>
+
+        <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Título *</label>
             <input type="text" name="titulo" value="{{ old('titulo', $demanda?->titulo) }}" required
                    class="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
