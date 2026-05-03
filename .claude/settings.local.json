@@ -1,0 +1,25 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(composer create-project *)",
+      "Bash(php --version)",
+      "Read(//usr/local/**)",
+      "Read(//Users/franciscoenoir/.composer/vendor/bin/**)",
+      "Read(//opt/homebrew/**)",
+      "Read(//Users/franciscoenoir/**)",
+      "Bash(curl -sS https://getcomposer.org/installer)",
+      "Bash(php -- --install-dir=/tmp --filename=composer)",
+      "Bash(/tmp/composer --version)",
+      "Bash(php /tmp/composer create-project laravel/laravel /tmp/laravel-agenda --prefer-dist --no-interaction)",
+      "Bash(php /tmp/composer require laravel/breeze barryvdh/laravel-dompdf --no-interaction)",
+      "Bash(php artisan *)",
+      "Bash(export PATH=\"/opt/homebrew/bin:$PATH\")",
+      "Bash(npm install *)",
+      "Bash(npm run *)",
+      "Bash(git init *)",
+      "Bash(git remote *)",
+      "Bash(git branch *)",
+      "Bash(git add *)"
+    ]
+  }
+}
