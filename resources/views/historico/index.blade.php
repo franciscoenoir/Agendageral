@@ -18,8 +18,8 @@
 
         <select name="categoria" class="text-sm border rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500">
             <option value="">Todas categorias</option>
-            @foreach(['Engenharia','Firedrill','Rosa Garden','Particular','Família','Administrativo','Outro'] as $cat)
-                <option value="{{ $cat }}" {{ request('categoria') === $cat ? 'selected' : '' }}>{{ $cat }}</option>
+            @foreach($categorias as $cat)
+                <option value="{{ $cat->nome }}" {{ request('categoria') === $cat->nome ? 'selected' : '' }}>{{ $cat->nome }}</option>
             @endforeach
         </select>
 

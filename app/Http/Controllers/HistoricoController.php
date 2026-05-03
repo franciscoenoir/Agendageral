@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Categoria;
 use App\Models\Demanda;
 use Illuminate\Http\Request;
 
@@ -33,10 +34,10 @@ class HistoricoController extends Controller
             $query->where('updated_at', '<=', $ate . ' 23:59:59');
         }
 
-        $demandas = $query->paginate(30)->withQueryString();
+        $demandas   = $query->paginate(30)->withQueryString();
+        $total      = Demanda::where('status', 'concluido')->count();
+        $categorias = Categoria::orderBy('nome')->get();
 
-        $total = Demanda::where('status', 'concluido')->count();
-
-        return view('historico.index', compact('demandas', 'total'));
+        return view('historico.index', compact('demandas', 'total', 'categorias'));
     }
 }

@@ -38,13 +38,59 @@
         </div>
 
         <div class="grid grid-cols-2 gap-4">
-            <div>
+            <div x-data="{
+                    cats: @json($categorias->pluck('nome')),
+                    catIds: @json($categorias->pluck('id', 'nome')),
+                    val: '{{ old('categoria', $demanda?->categoria ?? '') }}',
+                    nova: false,
+                    novoNome: '',
+                    csrf: document.querySelector('meta[name=csrf-token]').content,
+                    async criar() {
+                        const nome = this.novoNome.trim();
+                        if (!nome) return;
+                        const r = await fetch('/categorias', {
+                            method: 'POST',
+                            headers: {'Content-Type':'application/json','X-CSRF-TOKEN':this.csrf},
+                            body: JSON.stringify({nome})
+                        });
+                        if (!r.ok) { alert('Categoria já existe ou nome inválido.'); return; }
+                        const cat = await r.json();
+                        this.cats.push(cat.nome);
+                        this.catIds[cat.nome] = cat.id;
+                        this.val = cat.nome;
+                        this.nova = false;
+                        this.novoNome = '';
+                    },
+                    async excluir(nome) {
+                        if (!confirm('Excluir a categoria «' + nome + '»?')) return;
+                        const id = this.catIds[nome];
+                        await fetch('/categorias/' + id, {method:'DELETE', headers:{'X-CSRF-TOKEN':this.csrf}});
+                        this.cats = this.cats.filter(c => c !== nome);
+                        if (this.val === nome) this.val = this.cats[0] ?? '';
+                    }
+                }">
+                <input type="hidden" name="categoria" :value="val">
                 <label class="block text-sm font-medium text-gray-700 mb-1">Categoria *</label>
-                <select name="categoria" required class="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    @foreach(['Engenharia','Firedrill','Rosa Garden','Particular','Família','Administrativo','Outro'] as $cat)
-                        <option value="{{ $cat }}" {{ old('categoria', $demanda?->categoria) === $cat ? 'selected' : '' }}>{{ $cat }}</option>
-                    @endforeach
-                </select>
+                <div x-show="!nova" class="flex gap-1">
+                    <select x-model="val" required class="flex-1 border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <template x-for="c in cats" :key="c">
+                            <option :value="c" x-text="c" :selected="c === val"></option>
+                        </template>
+                    </select>
+                    <button type="button" @click="nova = true"
+                            class="px-2 py-1 text-xs bg-indigo-50 text-indigo-700 rounded-lg hover:bg-indigo-100 shrink-0" title="Nova categoria">+</button>
+                    <button type="button" @click="excluir(val)"
+                            class="px-2 py-1 text-xs bg-red-50 text-red-500 rounded-lg hover:bg-red-100 shrink-0" title="Excluir categoria selecionada">🗑</button>
+                </div>
+                <div x-show="nova" class="flex gap-1">
+                    <input x-model="novoNome" @keydown.enter.prevent="criar()" @keydown.escape="nova=false;novoNome=''" type="text"
+                           placeholder="Nome da categoria..."
+                           class="flex-1 border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" x-ref="novoInput" @x-show.window="nova && $nextTick(() => $refs.novoInput?.focus())">
+                    <button type="button" @click="criar()"
+                            class="px-3 py-1 text-xs bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 shrink-0">Salvar</button>
+                    <button type="button" @click="nova=false;novoNome=''"
+                            class="px-2 py-1 text-xs text-gray-400 hover:text-gray-700 shrink-0">✕</button>
+                </div>
             </div>
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Urgência *</label>

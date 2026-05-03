@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\DemandaRequest;
 use App\Models\Demanda;
+use App\Models\Categoria;
 use App\Models\Pasta;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
@@ -45,8 +46,9 @@ class DemandaController extends Controller
             $query->where('categoria', $categoria);
         }
 
-        $demandas = $query->get();
-        $pastas   = Pasta::orderBy('nome')->get();
+        $demandas   = $query->get();
+        $pastas     = Pasta::orderBy('nome')->get();
+        $categorias = Categoria::orderBy('nome')->get();
 
         $stats = [
             'total'     => Demanda::pendentes()->count(),
@@ -55,13 +57,14 @@ class DemandaController extends Controller
             'semana'    => Demanda::semana()->count(),
         ];
 
-        return view('demandas.index', compact('demandas', 'stats', 'filtro', 'pastas'));
+        return view('demandas.index', compact('demandas', 'stats', 'filtro', 'pastas', 'categorias'));
     }
 
     public function create()
     {
-        $pastas = Pasta::orderBy('nome')->get();
-        return view('demandas.create', compact('pastas'));
+        $pastas     = Pasta::orderBy('nome')->get();
+        $categorias = Categoria::orderBy('nome')->get();
+        return view('demandas.create', compact('pastas', 'categorias'));
     }
 
     public function store(DemandaRequest $request)
@@ -80,8 +83,9 @@ class DemandaController extends Controller
     public function edit(Demanda $demanda)
     {
         $demanda->load('links');
-        $pastas = Pasta::orderBy('nome')->get();
-        return view('demandas.edit', compact('demanda', 'pastas'));
+        $pastas     = Pasta::orderBy('nome')->get();
+        $categorias = Categoria::orderBy('nome')->get();
+        return view('demandas.edit', compact('demanda', 'pastas', 'categorias'));
     }
 
     public function update(DemandaRequest $request, Demanda $demanda)

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AgendaController;
+use App\Http\Controllers\CategoriaController;
 use App\Http\Controllers\HistoricoController;
 use App\Http\Controllers\PastaController;
 use App\Http\Controllers\LembreteController;
@@ -35,6 +36,9 @@ Route::middleware('auth')->group(function () {
     Route::patch('demandas/{demanda}/pasta', [DemandaController::class, 'moverPasta'])->name('demandas.pasta');
 
     Route::get('historico', [HistoricoController::class, 'index'])->name('historico');
+
+    Route::post('categorias', [CategoriaController::class, 'store'])->name('categorias.store');
+    Route::delete('categorias/{categoria}', [CategoriaController::class, 'destroy'])->name('categorias.destroy');
 
     Route::get('lembretes', [LembreteController::class, 'index'])->name('lembretes');
     Route::post('lembretes', [LembreteController::class, 'store'])->name('lembretes.store');
