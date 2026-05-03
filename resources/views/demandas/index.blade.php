@@ -8,39 +8,36 @@
     @keydown.escape.window="fecharModal()"
 >
 
-{{-- Header --}}
-<div class="flex items-center justify-between mb-6">
-    <h1 class="text-xl font-bold text-gray-900">Dashboard</h1>
+{{-- Top bar: stats + ações --}}
+<div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+    <div class="flex flex-wrap gap-2">
+        @foreach([
+            ['label'=>'Pendentes','value'=>$stats['total'],'color'=>'blue'],
+            ['label'=>'Urgentes','value'=>$stats['urgentes'],'color'=>'red'],
+            ['label'=>'Atrasadas','value'=>$stats['atrasadas'],'color'=>'orange'],
+            ['label'=>'Esta semana','value'=>$stats['semana'],'color'=>'green'],
+        ] as $stat)
+        <div class="flex items-center gap-1.5 bg-white rounded-lg px-3 py-1 shadow-sm border-l-4 border-{{ $stat['color'] }}-500">
+            <span class="text-sm font-bold text-{{ $stat['color'] }}-600">{{ $stat['value'] }}</span>
+            <span class="text-xs text-gray-500">{{ $stat['label'] }}</span>
+        </div>
+        @endforeach
+    </div>
     <div class="flex items-center gap-2">
         <button @click="abrirModal()"
-            class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 shadow-sm">
+            class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 text-white text-xs font-medium rounded-lg hover:bg-indigo-700 shadow-sm">
             📁 Pastas
         </button>
         <a href="{{ route('demandas.create') }}"
-           class="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 shadow-sm">
+           class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-green-600 text-white text-xs font-medium rounded-lg hover:bg-green-700 shadow-sm">
             ➕ Nova Demanda
         </a>
     </div>
 </div>
 
-{{-- Stats --}}
-<div class="flex flex-wrap gap-2 mb-4">
-    @foreach([
-        ['label'=>'Pendentes','value'=>$stats['total'],'color'=>'blue'],
-        ['label'=>'Urgentes','value'=>$stats['urgentes'],'color'=>'red'],
-        ['label'=>'Atrasadas','value'=>$stats['atrasadas'],'color'=>'orange'],
-        ['label'=>'Esta semana','value'=>$stats['semana'],'color'=>'green'],
-    ] as $stat)
-    <div class="flex items-center gap-2 bg-white rounded-lg px-3 py-1.5 shadow-sm border-l-4 border-{{ $stat['color'] }}-500">
-        <span class="text-base font-bold text-{{ $stat['color'] }}-600">{{ $stat['value'] }}</span>
-        <span class="text-xs text-gray-500">{{ $stat['label'] }}</span>
-    </div>
-    @endforeach
-</div>
-
-{{-- View toggle + Filters --}}
-<div class="bg-white rounded-xl shadow-sm p-4 mb-4">
-    <div class="flex flex-wrap items-center gap-2 mb-3">
+{{-- Filtros --}}
+<div class="bg-white rounded-xl shadow-sm p-3 mb-3">
+    <div class="flex flex-wrap items-center gap-2 mb-2">
         <div class="flex rounded-lg border border-gray-200 overflow-hidden mr-2">
             <button @click="vista='lista'"
                     :class="vista==='lista' ? 'bg-gray-800 text-white' : 'bg-white text-gray-500 hover:bg-gray-50'"
@@ -59,7 +56,7 @@
         </a>
         @endforeach
     </div>
-    <form method="GET" class="flex gap-2">
+    <form method="GET" class="flex flex-wrap gap-2">
         <input type="hidden" name="filtro" value="{{ $filtro }}">
         <input type="text" name="busca" value="{{ request('busca') }}"
                placeholder="Buscar por título, observação ou responsável..."
@@ -119,7 +116,7 @@
         };
         $demandasDaPasta = $demandasComPasta->get($pasta->id, collect());
     @endphp
-    <div class="border {{ $corBg }} rounded-xl mb-4 overflow-hidden" x-data="{ aberta: true }">
+    <div class="border {{ $corBg }} rounded-xl mb-4 overflow-hidden" x-data="{ aberta: false }">
         <div class="flex items-center justify-between px-4 py-3 cursor-pointer" @click="aberta = !aberta">
             <div class="flex items-center gap-2">
                 <span class="text-lg {{ $corIcon }}">📁</span>
@@ -143,7 +140,7 @@
     @endforeach
 
     @if($demandasSemPasta->isNotEmpty())
-    <div class="border border-gray-200 bg-gray-50 rounded-xl mb-4 overflow-hidden" x-data="{ aberta: true }">
+    <div class="border border-gray-200 bg-gray-50 rounded-xl mb-4 overflow-hidden" x-data="{ aberta: false }">
         <div class="flex items-center justify-between px-4 py-3 cursor-pointer" @click="aberta = !aberta">
             <div class="flex items-center gap-2">
                 <span class="text-lg text-gray-400">📂</span>

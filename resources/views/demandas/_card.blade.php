@@ -7,6 +7,8 @@
         default   => 'border-gray-300',
     };
     $bgColor = $demanda->isAtrasada() ? 'bg-red-50' : 'bg-white';
+    $checkTotal    = $demanda->relationLoaded('checklistItems') ? $demanda->checklistItems->count() : 0;
+    $checkConcluidos = $demanda->relationLoaded('checklistItems') ? $demanda->checklistItems->where('concluido', true)->count() : 0;
 @endphp
 <div class="rounded-xl shadow-sm border-l-4 {{ $borderColor }} {{ $bgColor }} p-4 mb-3">
     <div class="flex flex-wrap items-start justify-between gap-2">
@@ -18,6 +20,14 @@
                 @endif
                 @if($demanda->auto_escalado)
                     <span class="text-xs px-2 py-0.5 bg-purple-100 text-purple-700 rounded-full">auto</span>
+                @endif
+                @if($demanda->recorrente)
+                    <span class="text-xs px-2 py-0.5 bg-sky-100 text-sky-700 rounded-full">🔁 {{ $demanda->frequencia }}</span>
+                @endif
+                @if($checkTotal > 0)
+                    <span class="text-xs px-2 py-0.5 {{ $checkConcluidos === $checkTotal ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600' }} rounded-full">
+                        ✅ {{ $checkConcluidos }}/{{ $checkTotal }}
+                    </span>
                 @endif
                 <span class="text-xs px-2 py-0.5 rounded-full
                     {{ $demanda->urgencia === 'urgente' ? 'bg-red-100 text-red-700' : '' }}
@@ -42,9 +52,6 @@
                     ⏱ Limite: {{ $demanda->data_limite->format('d/m/Y') }} ({{ $demanda->prazo_label }})
                 </span>
             </div>
-            @if($demanda->observacoes)
-                <p class="mt-1 text-xs text-gray-600 line-clamp-2">{{ $demanda->observacoes }}</p>
-            @endif
             @if($demanda->links->isNotEmpty())
                 <div class="mt-1 flex flex-wrap gap-2">
                     @foreach($demanda->links as $link)

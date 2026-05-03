@@ -2,7 +2,9 @@
 
 use App\Http\Controllers\AgendaController;
 use App\Http\Controllers\CategoriaController;
+use App\Http\Controllers\ChecklistItemController;
 use App\Http\Controllers\RecebimentoController;
+use App\Http\Controllers\SearchController;
 use App\Http\Controllers\HistoricoController;
 use App\Http\Controllers\PastaController;
 use App\Http\Controllers\LembreteController;
@@ -38,6 +40,12 @@ Route::middleware('auth')->group(function () {
     Route::patch('demandas/{demanda}/pasta', [DemandaController::class, 'moverPasta'])->name('demandas.pasta');
 
     Route::get('historico', [HistoricoController::class, 'index'])->name('historico');
+
+    Route::get('busca', [SearchController::class, 'index'])->name('busca');
+
+    Route::post('demandas/{demanda}/checklist', [ChecklistItemController::class, 'store'])->name('checklist.store');
+    Route::patch('checklist/{item}', [ChecklistItemController::class, 'update'])->name('checklist.update');
+    Route::delete('checklist/{item}', [ChecklistItemController::class, 'destroy'])->name('checklist.destroy');
 
     Route::post('categorias', [CategoriaController::class, 'store'])->name('categorias.store');
     Route::delete('categorias/{categoria}', [CategoriaController::class, 'destroy'])->name('categorias.destroy');

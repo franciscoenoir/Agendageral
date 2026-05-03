@@ -19,7 +19,13 @@
       "Bash(git init *)",
       "Bash(git remote *)",
       "Bash(git branch *)",
-      "Bash(git add *)"
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)",
+      "Bash(git pull *)",
+      "Bash(git config *)",
+      "Bash(git -C /Users/franciscoenoir/Documents/Projetos/agenda status)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:8000)"
     ]
   }
 }

@@ -28,8 +28,12 @@ document.addEventListener('alpine:init', () => {
 <form method="POST" action="{{ $action }}"
       x-data="{
           links: {{ $demanda ? json_encode($demanda->links->map(fn($l) => ['url' => $l->url, 'label' => $l->label ?? ''])->toArray()) : '[]' }},
+          checklist: {{ $demanda ? json_encode($demanda->checklistItems->pluck('texto')->toArray()) : '[]' }},
+          recorrente: {{ old('recorrente', $demanda?->recorrente) ? 'true' : 'false' }},
           addLink() { this.links.push({ url: '', label: '' }) },
-          removeLink(i) { this.links.splice(i, 1) }
+          removeLink(i) { this.links.splice(i, 1) },
+          addCheck() { this.checklist.push('') },
+          removeCheck(i) { this.checklist.splice(i, 1) },
       }">
     @csrf
     @if($method !== 'POST') @method($method) @endif
@@ -149,6 +153,44 @@ document.addEventListener('alpine:init', () => {
                     <button type="button" @click="removeLink(i)" class="text-red-400 hover:text-red-600 text-sm px-2">✕</button>
                 </div>
             </template>
+        </div>
+
+        {{-- Checklist --}}
+        <div>
+            <div class="flex items-center justify-between mb-2">
+                <label class="text-sm font-medium text-gray-700">✅ Checklist</label>
+                <button type="button" @click="addCheck()" class="text-xs text-indigo-600 hover:underline">+ Adicionar item</button>
+            </div>
+            <template x-for="(item, i) in checklist" :key="i">
+                <div class="flex gap-2 mb-2">
+                    <input type="text" :name="`checklist[${i}]`" x-model="checklist[i]"
+                           placeholder="Descreva a sub-tarefa..."
+                           class="flex-1 border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    <button type="button" @click="removeCheck(i)" class="text-red-400 hover:text-red-600 text-sm px-2">✕</button>
+                </div>
+            </template>
+            <p x-show="checklist.length === 0" class="text-xs text-gray-400 italic">Nenhum item. Clique em "+ Adicionar item" para criar sub-tarefas.</p>
+        </div>
+
+        {{-- Recorrência --}}
+        <div class="border border-gray-200 rounded-lg p-3 bg-gray-50">
+            <div class="flex items-center gap-3 mb-2">
+                <label class="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" name="recorrente" value="1" x-model="recorrente"
+                           class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
+                    <span class="text-sm font-medium text-gray-700">🔁 Demanda recorrente</span>
+                </label>
+            </div>
+            <div x-show="recorrente" x-cloak>
+                <label class="block text-xs text-gray-500 mb-1">Repetir a cada</label>
+                <select name="frequencia"
+                        class="border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    @foreach(['semanal'=>'Semana','quinzenal'=>'15 dias','mensal'=>'Mês','anual'=>'Ano'] as $val => $label)
+                        <option value="{{ $val }}" {{ old('frequencia', $demanda?->frequencia) === $val ? 'selected' : '' }}>{{ $label }}</option>
+                    @endforeach
+                </select>
+                <p class="text-xs text-gray-400 mt-1">Ao concluir, uma nova demanda será criada automaticamente.</p>
+            </div>
         </div>
 
         <div class="flex gap-3 pt-2">

@@ -15,12 +15,14 @@ class Demanda extends Model
         'pasta_id', 'titulo', 'categoria', 'urgencia', 'status',
         'data_inicio', 'data_limite', 'responsavel', 'valor',
         'observacoes', 'auto_escalado', 'google_event_id',
+        'recorrente', 'frequencia',
     ];
 
     protected $casts = [
-        'data_inicio' => 'date',
-        'data_limite' => 'date',
+        'data_inicio'   => 'date',
+        'data_limite'   => 'date',
         'auto_escalado' => 'boolean',
+        'recorrente'    => 'boolean',
     ];
 
     protected static function boot(): void
@@ -55,6 +57,11 @@ class Demanda extends Model
     public function pagamentos(): HasMany
     {
         return $this->hasMany(Pagamento::class);
+    }
+
+    public function checklistItems(): HasMany
+    {
+        return $this->hasMany(ChecklistItem::class)->orderBy('ordem');
     }
 
     public function pasta()

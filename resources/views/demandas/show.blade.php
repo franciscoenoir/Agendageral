@@ -50,6 +50,53 @@
             </div>
         @endif
 
+        {{-- Checklist --}}
+        @if($demanda->checklistItems->isNotEmpty())
+        <div x-data="checklistShow({{ $demanda->id }}, @json($demanda->checklistItems))">
+            <div class="text-sm font-medium text-gray-700 mb-2">✅ Checklist
+                <span class="text-xs font-normal text-gray-400 ml-1"
+                      x-text="`(${items.filter(i=>i.concluido).length}/${items.length})`"></span>
+            </div>
+            {{-- barra de progresso --}}
+            <div class="h-1.5 bg-gray-100 rounded-full mb-3 overflow-hidden">
+                <div class="h-1.5 bg-green-500 rounded-full transition-all"
+                     :style="`width:${items.length ? Math.round(items.filter(i=>i.concluido).length/items.length*100) : 0}%`"></div>
+            </div>
+            <template x-for="item in items" :key="item.id">
+                <div class="flex items-center gap-2 py-1.5 border-b border-gray-50 group">
+                    <input type="checkbox" :checked="item.concluido"
+                           @change="toggle(item)"
+                           class="rounded border-gray-300 text-green-600 focus:ring-green-500 cursor-pointer">
+                    <span :class="item.concluido ? 'line-through text-gray-400' : 'text-gray-700'"
+                          class="flex-1 text-sm" x-text="item.texto"></span>
+                    <button @click="excluir(item)"
+                            class="opacity-0 group-hover:opacity-100 text-red-400 hover:text-red-600 text-xs transition-opacity">✕</button>
+                </div>
+            </template>
+            {{-- Adicionar inline --}}
+            <div class="flex gap-2 mt-2">
+                <input x-model="novoItem" @keydown.enter.prevent="adicionar()"
+                       type="text" placeholder="Novo item..."
+                       class="flex-1 text-sm border rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                <button @click="adicionar()"
+                        class="px-3 py-1.5 text-xs bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">+ Adicionar</button>
+            </div>
+        </div>
+        @else
+        <div x-data="checklistShow({{ $demanda->id }}, [])">
+            <div class="flex items-center justify-between mb-1">
+                <span class="text-sm font-medium text-gray-700">✅ Checklist</span>
+            </div>
+            <div class="flex gap-2">
+                <input x-model="novoItem" @keydown.enter.prevent="adicionar()"
+                       type="text" placeholder="Adicionar primeiro item..."
+                       class="flex-1 text-sm border rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                <button @click="adicionar()"
+                        class="px-3 py-1.5 text-xs bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">+ Adicionar</button>
+            </div>
+        </div>
+        @endif
+
         @if($demanda->links->isNotEmpty())
             <div>
                 <div class="text-sm text-gray-500 mb-2">Links:</div>
@@ -85,3 +132,43 @@
     </div>
 </div>
 @endsection
+
+<script>
+function checklistShow(demandaId, initialItems) {
+    return {
+        items: initialItems,
+        novoItem: '',
+        csrf: document.querySelector('meta[name=csrf-token]').content,
+
+        async toggle(item) {
+            item.concluido = !item.concluido;
+            await fetch(`/checklist/${item.id}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': this.csrf },
+                body: JSON.stringify({ concluido: item.concluido }),
+            });
+        },
+
+        async adicionar() {
+            const texto = this.novoItem.trim();
+            if (!texto) return;
+            const r = await fetch(`/demandas/${demandaId}/checklist`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': this.csrf },
+                body: JSON.stringify({ texto }),
+            });
+            const item = await r.json();
+            this.items.push(item);
+            this.novoItem = '';
+        },
+
+        async excluir(item) {
+            await fetch(`/checklist/${item.id}`, {
+                method: 'DELETE',
+                headers: { 'X-CSRF-TOKEN': this.csrf },
+            });
+            this.items = this.items.filter(i => i.id !== item.id);
+        },
+    };
+}
+</script>
