@@ -38,37 +38,7 @@
         </div>
 
         <div class="grid grid-cols-2 gap-4">
-            <div x-data="{
-                    cats: @json($categorias->pluck('nome')),
-                    catIds: @json($categorias->pluck('id', 'nome')),
-                    val: '{{ old('categoria', $demanda?->categoria ?? '') }}',
-                    nova: false,
-                    novoNome: '',
-                    csrf: document.querySelector('meta[name=csrf-token]').content,
-                    async criar() {
-                        const nome = this.novoNome.trim();
-                        if (!nome) return;
-                        const r = await fetch('/categorias', {
-                            method: 'POST',
-                            headers: {'Content-Type':'application/json','X-CSRF-TOKEN':this.csrf},
-                            body: JSON.stringify({nome})
-                        });
-                        if (!r.ok) { alert('Categoria já existe ou nome inválido.'); return; }
-                        const cat = await r.json();
-                        this.cats.push(cat.nome);
-                        this.catIds[cat.nome] = cat.id;
-                        this.val = cat.nome;
-                        this.nova = false;
-                        this.novoNome = '';
-                    },
-                    async excluir(nome) {
-                        if (!confirm('Excluir a categoria «' + nome + '»?')) return;
-                        const id = this.catIds[nome];
-                        await fetch('/categorias/' + id, {method:'DELETE', headers:{'X-CSRF-TOKEN':this.csrf}});
-                        this.cats = this.cats.filter(c => c !== nome);
-                        if (this.val === nome) this.val = this.cats[0] ?? '';
-                    }
-                }">
+            <div x-data="categoriaSelector(@json($categorias->pluck('nome')), @json($categorias->pluck('id', 'nome')), @js(old('categoria', $demanda?->categoria ?? '')))">
                 <input type="hidden" name="categoria" :value="val">
                 <label class="block text-sm font-medium text-gray-700 mb-1">Categoria *</label>
                 <div x-show="!nova" class="flex gap-1">
@@ -85,7 +55,8 @@
                 <div x-show="nova" class="flex gap-1">
                     <input x-model="novoNome" @keydown.enter.prevent="criar()" @keydown.escape="nova=false;novoNome=''" type="text"
                            placeholder="Nome da categoria..."
-                           class="flex-1 border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" x-ref="novoInput" @x-show.window="nova && $nextTick(() => $refs.novoInput?.focus())">
+                           class="flex-1 border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                           x-ref="novoInput" x-init="$watch('nova', v => v && $nextTick(() => $refs.novoInput.focus()))">
                     <button type="button" @click="criar()"
                             class="px-3 py-1 text-xs bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 shrink-0">Salvar</button>
                     <button type="button" @click="nova=false;novoNome=''"
@@ -153,3 +124,41 @@
         </div>
     </div>
 </form>
+
+<script>
+function categoriaSelector(cats, catIds, initial) {
+    return {
+        cats,
+        catIds,
+        val: initial || (cats[0] ?? ''),
+        nova: false,
+        novoNome: '',
+        csrf: document.querySelector('meta[name=csrf-token]').content,
+
+        async criar() {
+            const nome = this.novoNome.trim();
+            if (!nome) return;
+            const r = await fetch('/categorias', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': this.csrf },
+                body: JSON.stringify({ nome }),
+            });
+            if (!r.ok) { alert('Categoria já existe ou nome inválido.'); return; }
+            const cat = await r.json();
+            this.cats.push(cat.nome);
+            this.catIds[cat.nome] = cat.id;
+            this.val = cat.nome;
+            this.nova = false;
+            this.novoNome = '';
+        },
+
+        async excluir(nome) {
+            if (!confirm('Excluir a categoria «' + nome + '»?')) return;
+            const id = this.catIds[nome];
+            await fetch('/categorias/' + id, { method: 'DELETE', headers: { 'X-CSRF-TOKEN': this.csrf } });
+            this.cats = this.cats.filter(c => c !== nome);
+            this.val = this.cats[0] ?? '';
+        },
+    };
+}
+</script>
