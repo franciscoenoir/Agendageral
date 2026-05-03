@@ -8,7 +8,13 @@
     <div class="mb-8">
         <div class="flex items-center justify-between mb-4">
             <h1 class="text-xl font-bold text-gray-900">Agenda Semanal</h1>
-            <span class="text-sm text-gray-500">{{ now()->format('d/m/Y') }}</span>
+            <div class="flex items-center gap-3">
+                <span class="text-sm text-gray-500">{{ now()->locale('pt_BR')->translatedFormat('d \d\e F \d\e Y') }}</span>
+                <a href="{{ route('agenda.pdf') }}"
+                   class="text-xs px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 font-medium">
+                    📄 Exportar PDF
+                </a>
+            </div>
         </div>
 
         <div class="overflow-x-auto">

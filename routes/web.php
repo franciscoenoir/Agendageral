@@ -21,6 +21,7 @@ Route::middleware('auth')->group(function () {
     Route::get('demandas-pdf', [DemandaController::class, 'exportPdf'])->name('demandas.pdf');
 
     Route::get('agenda', [AgendaController::class, 'index'])->name('agenda');
+    Route::get('agenda/pdf', [AgendaController::class, 'exportPdf'])->name('agenda.pdf');
     Route::get('agenda/data', [AgendaController::class, 'data'])->name('agenda.data');
 
     Route::get('configuracoes', [ConfiguracaoController::class, 'index'])->name('configuracoes');
