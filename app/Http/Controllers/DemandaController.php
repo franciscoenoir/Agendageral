@@ -50,12 +50,26 @@ class DemandaController extends Controller
         $pastas     = Pasta::orderBy('nome')->get();
         $categorias = Categoria::orderBy('nome')->get();
 
-        $stats = [
-            'total'     => Demanda::pendentes()->count(),
-            'urgentes'  => Demanda::urgentes()->count(),
-            'atrasadas' => Demanda::atrasadas()->count(),
-            'semana'    => Demanda::semana()->count(),
-        ];
+        // Quando filtro='todos' a coleção já tem tudo — derivar sem queries extras.
+        // Nos outros filtros a coleção está recortada, então consultar o banco.
+        if ($filtro === 'todos' || $filtro === 'pendentes') {
+            $base = $demandas->where('status', 'pendente');
+            $stats = [
+                'total'     => $base->count(),
+                'urgentes'  => $base->where('urgencia', 'urgente')->count(),
+                'atrasadas' => $base->filter(fn($d) => $d->isAtrasada())->count(),
+                'semana'    => $base->filter(fn($d) =>
+                                   $d->data_limite->between(today(), today()->addDays(7))
+                               )->count(),
+            ];
+        } else {
+            $stats = [
+                'total'     => Demanda::pendentes()->count(),
+                'urgentes'  => Demanda::urgentes()->count(),
+                'atrasadas' => Demanda::atrasadas()->count(),
+                'semana'    => Demanda::semana()->count(),
+            ];
+        }
 
         return view('demandas.index', compact('demandas', 'stats', 'filtro', 'pastas', 'categorias'));
     }

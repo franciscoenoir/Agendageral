@@ -76,6 +76,49 @@ class AgendaController extends Controller
         return $pdf->download('agenda-' . $hoje->format('Y-m') . '.pdf');
     }
 
+    public function exportPdfMensal(Request $request)
+    {
+        $hoje     = today();
+        $mes      = (int) $request->input('mes', $hoje->month);
+        $ano      = (int) $request->input('ano', $hoje->year);
+
+        $primeiro    = Carbon::create($ano, $mes, 1);
+        $ultimo      = $primeiro->copy()->endOfMonth();
+        $mesDemandas = Demanda::pendentes()
+            ->whereBetween('data_limite', [$primeiro, $ultimo])
+            ->orderBy('data_limite')
+            ->get()
+            ->groupBy(fn($d) => $d->data_limite->toDateString());
+
+        $diasMes = [];
+        $offset  = $primeiro->dayOfWeek;
+        for ($i = 0; $i < $offset; $i++) {
+            $diasMes[] = null;
+        }
+        for ($d = 1; $d <= $ultimo->day; $d++) {
+            $dt = $primeiro->copy()->addDays($d - 1);
+            $diasMes[] = [
+                'data'     => $dt,
+                'hoje'     => $dt->isToday(),
+                'fds'      => $dt->isWeekend(),
+                'demandas' => $mesDemandas->get($dt->toDateString(), collect()),
+            ];
+        }
+        $resto = count($diasMes) % 7;
+        if ($resto > 0) {
+            for ($i = 0; $i < (7 - $resto); $i++) {
+                $diasMes[] = null;
+            }
+        }
+
+        $nomeMes = $primeiro->locale('pt_BR')->translatedFormat('F \d\e Y');
+
+        $pdf = Pdf::loadView('agenda.pdf-mensal', compact('diasMes', 'nomeMes', 'hoje', 'primeiro'))
+            ->setPaper('a4', 'landscape');
+
+        return $pdf->download('agenda-mensal-' . $primeiro->format('Y-m') . '.pdf');
+    }
+
     public function data(Request $request): JsonResponse
     {
         $inicio = $request->input('inicio') ? Carbon::parse($request->input('inicio')) : today();

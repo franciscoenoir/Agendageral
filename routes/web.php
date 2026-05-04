@@ -23,6 +23,7 @@ Route::middleware('auth')->group(function () {
     Route::get('demandas-pdf', [DemandaController::class, 'exportPdf'])->name('demandas.pdf');
 
     Route::get('agenda', [AgendaController::class, 'index'])->name('agenda');
+    Route::get('agenda/pdf/mensal', [AgendaController::class, 'exportPdfMensal'])->name('agenda.pdf.mensal');
     Route::get('agenda/pdf', [AgendaController::class, 'exportPdf'])->name('agenda.pdf');
     Route::get('agenda/data', [AgendaController::class, 'data'])->name('agenda.data');
 
@@ -40,6 +41,8 @@ Route::middleware('auth')->group(function () {
     Route::patch('demandas/{demanda}/pasta', [DemandaController::class, 'moverPasta'])->name('demandas.pasta');
 
     Route::get('historico', [HistoricoController::class, 'index'])->name('historico');
+    Route::delete('historico/limpar', [HistoricoController::class, 'limpar'])->name('historico.limpar');
+    Route::delete('historico/{demanda}', [HistoricoController::class, 'destroy'])->name('historico.destroy');
 
     Route::get('busca', [SearchController::class, 'index'])->name('busca');
 

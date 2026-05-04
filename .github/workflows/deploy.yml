@@ -30,13 +30,19 @@ jobs:
       - name: Instalar dependências JS e build
         run: npm ci && npm run build
 
+      - name: Pré-cache de rotas
+        run: |
+          cp .env.example .env
+          php artisan key:generate --quiet
+          php artisan route:cache
+
       - name: Deploy via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
-          server: ${{ secrets.FTP_HOST }}
-          username: ${{ secrets.FTP_USER }}
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          server-dir: ${{ secrets.FTP_PATH }}
+          server-dir: ${{ secrets.FTP_SERVER_DIR }}
           exclude: |
             **/.git*
             **/.git*/**
@@ -45,3 +51,4 @@ jobs:
             .env
             .env.example
             instrucao-laravel-demandas.md
+            database/database.sqlite

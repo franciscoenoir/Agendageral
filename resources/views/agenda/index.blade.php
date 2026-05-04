@@ -12,7 +12,11 @@
                 <span class="text-sm text-gray-500">{{ now()->locale('pt_BR')->translatedFormat('d \d\e F \d\e Y') }}</span>
                 <a href="{{ route('agenda.pdf') }}"
                    class="text-xs px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 font-medium">
-                    📄 Exportar PDF
+                    📄 PDF Semanal
+                </a>
+                <a href="{{ route('agenda.pdf.mensal') }}"
+                   class="text-xs px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 font-medium">
+                    📅 PDF Mensal
                 </a>
             </div>
         </div>
@@ -59,6 +63,10 @@
                 <button @click="mesAnterior()" class="w-8 h-8 flex items-center justify-center rounded-full bg-white shadow hover:bg-gray-50 text-gray-600">‹</button>
                 <span class="text-sm font-semibold text-gray-700 min-w-[120px] text-center" x-text="nomeMes()"></span>
                 <button @click="proximoMes()" class="w-8 h-8 flex items-center justify-center rounded-full bg-white shadow hover:bg-gray-50 text-gray-600">›</button>
+                <a :href="`/agenda/pdf/mensal?mes=${mesAtual+1}&ano=${anoAtual}`"
+                   class="text-xs px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 font-medium">
+                    📄 Exportar PDF
+                </a>
             </div>
         </div>
 

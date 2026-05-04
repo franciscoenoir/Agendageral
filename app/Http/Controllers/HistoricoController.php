@@ -8,6 +8,19 @@ use Illuminate\Http\Request;
 
 class HistoricoController extends Controller
 {
+    public function destroy(Demanda $demanda)
+    {
+        $demanda->forceDelete();
+        return back()->with('success', 'Demanda removida do histórico.');
+    }
+
+    public function limpar()
+    {
+        $count = Demanda::where('status', 'concluido')->count();
+        Demanda::where('status', 'concluido')->forceDelete();
+        return redirect()->route('historico')->with('success', "{$count} demanda(s) removida(s) do histórico.");
+    }
+
     public function index(Request $request)
     {
         $query = Demanda::where('status', 'concluido')

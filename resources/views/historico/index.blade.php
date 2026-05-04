@@ -2,10 +2,48 @@
 @section('title', 'Histórico')
 
 @section('content')
+<div x-data="{ confirmarLimpar: false }">
+
 <div class="flex items-center justify-between mb-4">
     <div>
         <h1 class="text-xl font-bold text-gray-900">🗂️ Histórico</h1>
         <p class="text-xs text-gray-400 mt-0.5">{{ number_format($total) }} demanda(s) concluída(s) no total</p>
+    </div>
+    @if($total > 0)
+    <button @click="confirmarLimpar = true"
+            class="flex items-center gap-1.5 text-xs px-3 py-1.5 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 font-medium">
+        🗑️ Limpar Histórico
+    </button>
+    @endif
+</div>
+
+{{-- Modal de confirmação --}}
+<div x-show="confirmarLimpar" x-cloak
+     class="fixed inset-0 z-50 flex items-center justify-center px-4"
+     @click.self="confirmarLimpar = false">
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
+    <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm z-10 p-6">
+        <div class="text-center mb-5">
+            <div class="text-4xl mb-3">🗑️</div>
+            <h2 class="text-base font-bold text-gray-900">Limpar todo o histórico?</h2>
+            <p class="text-sm text-gray-500 mt-1">
+                Isso vai apagar <strong>{{ number_format($total) }} demanda(s)</strong> permanentemente.<br>
+                Essa ação não pode ser desfeita.
+            </p>
+        </div>
+        <div class="flex gap-3">
+            <button @click="confirmarLimpar = false"
+                    class="flex-1 py-2 text-sm border border-gray-200 rounded-lg text-gray-600 hover:bg-gray-50">
+                Cancelar
+            </button>
+            <form method="POST" action="{{ route('historico.limpar') }}" class="flex-1">
+                @csrf @method('DELETE')
+                <button type="submit"
+                        class="w-full py-2 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium">
+                    Sim, limpar tudo
+                </button>
+            </form>
+        </div>
     </div>
 </div>
 
@@ -108,6 +146,14 @@
                     ↩ Reabrir
                 </button>
             </form>
+            <form method="POST" action="{{ route('historico.destroy', $demanda) }}"
+                  onsubmit="return confirm('Excluir esta demanda permanentemente?')">
+                @csrf @method('DELETE')
+                <button type="submit"
+                        class="text-xs px-2 py-1 bg-red-50 text-red-500 rounded hover:bg-red-100">
+                    🗑
+                </button>
+            </form>
         </div>
     </div>
 </div>
@@ -125,4 +171,5 @@
     </div>
 @endif
 
+</div>{{-- /x-data --}}
 @endsection
