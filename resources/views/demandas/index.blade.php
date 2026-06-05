@@ -48,7 +48,7 @@
         </div>
         @foreach([
             'todos'=>'Todos','pendentes'=>'Pendentes','atrasadas'=>'🔴 Atrasadas',
-            'urgentes'=>'🟠 Urgentes','hoje'=>'Hoje','semana'=>'Esta semana','concluidas'=>'Concluídas'
+            'urgentes'=>'🟠 Urgentes','hoje'=>'Hoje','semana'=>'Esta semana'
         ] as $key => $label)
         <a href="{{ route('dashboard', array_merge(request()->except('filtro'), ['filtro' => $key])) }}"
            class="px-3 py-1 rounded-full text-xs font-medium {{ $filtro === $key ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200' }}">

@@ -30,8 +30,7 @@ class DemandaController extends Controller
             'hoje'       => $query->where('data_limite', today())->pendentes(),
             'semana'     => $query->semana(),
             'pendentes'  => $query->pendentes(),
-            'concluidas' => $query->where('status', 'concluido'),
-            default      => null,
+            default      => $query->pendentes(),
         };
 
         if ($busca = $request->get('busca')) {
