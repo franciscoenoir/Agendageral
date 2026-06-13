@@ -19,6 +19,13 @@ jobs:
         with:
           php-version: '8.3'
 
+      - name: Cache dependências Composer
+        uses: actions/cache@v4
+        with:
+          path: vendor
+          key: composer-${{ hashFiles('composer.lock') }}
+          restore-keys: composer-
+
       - name: Instalar dependências PHP
         run: composer install --no-interaction --prefer-dist --optimize-autoloader --no-dev --ignore-platform-reqs
 
@@ -26,6 +33,13 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
+
+      - name: Cache dependências npm
+        uses: actions/cache@v4
+        with:
+          path: node_modules
+          key: npm-${{ hashFiles('package-lock.json') }}
+          restore-keys: npm-
 
       - name: Instalar dependências JS e build
         run: npm ci && npm run build
@@ -36,6 +50,13 @@ jobs:
           php artisan key:generate --quiet
           php artisan route:cache
 
+      - name: Cache estado FTP (sync state)
+        uses: actions/cache@v4
+        with:
+          path: .ftp-deploy-sync-state.json
+          key: ftp-sync-${{ github.ref_name }}
+          restore-keys: ftp-sync-
+
       - name: Deploy via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
@@ -45,7 +66,8 @@ jobs:
           server-dir: ${{ secrets.FTP_PATH }}
           security: loose
           timeout: 0
-          retry-count: 5
+          retry-count: 25
+          log-level: minimal
           exclude: |
             **/.git*
             **/.git*/**
