@@ -43,12 +43,28 @@ jobs:
           username: ${{ secrets.FTP_USER }}
           password: ${{ secrets.FTP_PASSWORD }}
           server-dir: ${{ secrets.FTP_PATH }}
+          security: loose
+          timeout: 120000
+          retry-count: 3
           exclude: |
             **/.git*
             **/.git*/**
             **/node_modules/**
             **/tests/**
+            **/vendor/*/tests/**
+            **/vendor/*/test/**
+            **/vendor/*/docs/**
+            **/vendor/*/doc/**
+            **/vendor/*/*.md
             .env
             .env.example
             instrucao-laravel-demandas.md
             database/database.sqlite
+
+      - name: Executar migrations e cache pós-deploy
+        run: |
+          curl --fail --silent --show-error \
+            --max-time 60 \
+            -X POST "${{ secrets.APP_URL }}/deploy/run" \
+            -H "X-Deploy-Token: ${{ secrets.DEPLOY_SECRET }}" \
+            | tee /dev/stderr | grep -q '"status":"ok"'
