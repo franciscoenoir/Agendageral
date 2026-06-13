@@ -43,38 +43,28 @@ jobs:
           php artisan key:generate --quiet
           php artisan route:cache
 
-      - name: Instalar lftp
-        run: sudo apt-get install -y lftp
-
-      - name: Deploy via FTP (lftp)
-        env:
-          FTP_HOST: ${{ secrets.FTP_HOST }}
-          FTP_USER: ${{ secrets.FTP_USER }}
-          FTP_PASS: ${{ secrets.FTP_PASSWORD }}
-          FTP_PATH: ${{ secrets.FTP_PATH }}
-        run: |
-          lftp -c "
-            set ftp:ssl-allow no;
-            set net:reconnect-interval-base 5;
-            set net:reconnect-interval-multiplier 1;
-            set net:max-retries 10;
-            set net:timeout 30;
-            set mirror:parallel-transfer-count 5;
-            set mirror:use-pget-n 5;
-            open -u '$FTP_USER','$FTP_PASS' '$FTP_HOST';
-            mirror --reverse --delete --verbose=1 \
-              --exclude-glob .git \
-              --exclude-glob .git/ \
-              --exclude-glob node_modules/ \
-              --exclude-glob vendor/ \
-              --exclude-glob tests/ \
-              --exclude-glob .env \
-              --exclude-glob .env.example \
-              --exclude-glob instrucao-laravel-demandas.md \
-              --exclude-glob database/database.sqlite \
-              . '$FTP_PATH';
-            bye
-          "
+      
+      - name: Deploy via FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_HOST }}
+          username: ${{ secrets.FTP_USER }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          server-dir: ${{ secrets.FTP_PATH }}
+          security: loose
+          timeout: 0
+          retry-count: 25
+          log-level: minimal
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/node_modules/**
+            **/tests/**
+            **/vendor/**
+            .env
+            .env.example
+            instrucao-laravel-demandas.md
+            database/database.sqlite
 
       - name: Executar migrations e cache pós-deploy
         run: |
