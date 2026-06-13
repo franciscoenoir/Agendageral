@@ -43,9 +43,9 @@ jobs:
           username: ${{ secrets.FTP_USER }}
           password: ${{ secrets.FTP_PASSWORD }}
           server-dir: ${{ secrets.FTP_PATH }}
-          security: loose
-          timeout: 120000
-          retry-count: 3
+          security: ftpes
+          timeout: 0
+          retry-count: 5
           exclude: |
             **/.git*
             **/.git*/**
