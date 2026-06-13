@@ -12,6 +12,7 @@ use App\Http\Controllers\AlertaController;
 use App\Http\Controllers\ConfiguracaoController;
 use App\Http\Controllers\DemandaController;
 use App\Http\Controllers\GoogleController;
+use App\Http\Controllers\DeployController;
 use App\Http\Controllers\WhatsAppController;
 use Illuminate\Support\Facades\Route;
 
@@ -64,5 +65,6 @@ Route::middleware('auth')->group(function () {
 });
 
 Route::post('webhook/whatsapp', [WhatsAppController::class, 'webhook'])->name('webhook.whatsapp');
+Route::post('deploy/run', [DeployController::class, 'run'])->name('deploy.run');
 
 require __DIR__.'/auth.php';

@@ -19,15 +19,8 @@ jobs:
         with:
           php-version: '8.3'
 
-      - name: Cache dependências Composer
-        uses: actions/cache@v4
-        with:
-          path: vendor
-          key: composer-${{ hashFiles('composer.lock') }}
-          restore-keys: composer-
-
-      - name: Instalar dependências PHP
-        run: composer install --no-interaction --prefer-dist --optimize-autoloader --no-dev --ignore-platform-reqs
+      - name: Instalar dependências PHP (apenas para route:cache)
+        run: composer install --no-interaction --prefer-dist --no-dev --ignore-platform-reqs
 
       - name: Configurar Node.js
         uses: actions/setup-node@v4
@@ -73,15 +66,12 @@ jobs:
               --exclude-glob .git \
               --exclude-glob .git/ \
               --exclude-glob node_modules/ \
+              --exclude-glob vendor/ \
               --exclude-glob tests/ \
               --exclude-glob .env \
               --exclude-glob .env.example \
               --exclude-glob instrucao-laravel-demandas.md \
               --exclude-glob database/database.sqlite \
-              --exclude-glob 'vendor/*/tests/' \
-              --exclude-glob 'vendor/*/test/' \
-              --exclude-glob 'vendor/*/docs/' \
-              --exclude-glob 'vendor/*/doc/' \
               . '$FTP_PATH';
             bye
           "
