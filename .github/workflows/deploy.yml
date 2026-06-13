@@ -43,7 +43,7 @@ jobs:
           username: ${{ secrets.FTP_USER }}
           password: ${{ secrets.FTP_PASSWORD }}
           server-dir: ${{ secrets.FTP_PATH }}
-          security: ftpes
+          security: loose
           timeout: 0
           retry-count: 5
           exclude: |
