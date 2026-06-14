@@ -7,7 +7,7 @@ on:
 
 jobs:
   deploy:
-    name: Build e deploy via FTP
+    name: Build e deploy via SSH
     runs-on: ubuntu-latest
 
     steps:
@@ -43,33 +43,36 @@ jobs:
           php artisan key:generate --quiet
           php artisan route:cache
 
-      
-      - name: Deploy via FTP
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
-        with:
-          server: ${{ secrets.FTP_HOST }}
-          username: ${{ secrets.FTP_USER }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          server-dir: ${{ secrets.FTP_PATH }}
-          security: loose
-          timeout: 0
-          retry-count: 25
-          log-level: minimal
-          exclude: |
-            **/.git*
-            **/.git*/**
-            **/node_modules/**
-            **/tests/**
-            **/vendor/**
-            .env
-            .env.example
-            instrucao-laravel-demandas.md
-            database/database.sqlite
+      - name: Instalar sshpass
+        run: sudo apt-get install -y sshpass
 
-      - name: Executar migrations e cache pós-deploy
+      - name: Deploy via rsync (SSH com senha)
+        env:
+          SSHPASS: ${{ secrets.SSH_PASS }}
         run: |
-          curl --fail --silent --show-error \
-            --max-time 60 \
-            -X POST "${{ secrets.APP_URL }}/deploy/run" \
-            -H "X-Deploy-Token: ${{ secrets.DEPLOY_SECRET }}" \
-            | tee /dev/stderr | grep -q '"status":"ok"'
+          sshpass -e rsync -azP --delete \
+            -e "ssh -p ${{ secrets.SSH_PORT }} -o StrictHostKeyChecking=no" \
+            --exclude='.git/' \
+            --exclude='node_modules/' \
+            --exclude='vendor/' \
+            --exclude='tests/' \
+            --exclude='.env' \
+            --exclude='.env.example' \
+            --exclude='database/database.sqlite' \
+            --exclude='instrucao-laravel-demandas.md' \
+            . ${{ secrets.SSH_USER }}@${{ secrets.SSH_IP }}:~/agenda
+
+      - name: Executar composer, migrations e cache pós-deploy (via SSH)
+        env:
+          SSHPASS: ${{ secrets.SSH_PASS }}
+        run: |
+          sshpass -e ssh -p ${{ secrets.SSH_PORT }} \
+            -o StrictHostKeyChecking=no \
+            ${{ secrets.SSH_USER }}@${{ secrets.SSH_IP }} \
+            "cd ~/agenda && \
+             composer install --no-interaction --prefer-dist --optimize-autoloader --no-dev && \
+             php artisan migrate --force && \
+             php artisan config:cache && \
+             php artisan route:cache && \
+             php artisan view:cache && \
+             php artisan optimize"
