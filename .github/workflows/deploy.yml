@@ -54,7 +54,7 @@ jobs:
             --exclude='.env.example' \
             --exclude='database/database.sqlite' \
             --exclude='instrucao-laravel-demandas.md' \
-            . ${{ secrets.SSH_USER }}@${{ secrets.SSH_IP }}:~/agenda
+            . ${{ secrets.SSH_USER }}@${{ secrets.SSH_IP }}:~/domains/premiered.com.br/public_html/agenda
 
       - name: Migrations e cache pós-deploy (via SSH)
         env:
@@ -63,7 +63,7 @@ jobs:
           sshpass -e ssh -p ${{ secrets.SSH_PORT }} \
             -o StrictHostKeyChecking=no \
             ${{ secrets.SSH_USER }}@${{ secrets.SSH_IP }} \
-            "cd ~/agenda && \
+            "cd ~/domains/premiered.com.br/public_html/agenda && \
              mkdir -p database && touch database/database.sqlite && \
              php artisan migrate --force && \
              php artisan config:cache && \
