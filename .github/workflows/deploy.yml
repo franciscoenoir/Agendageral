@@ -43,41 +43,33 @@ jobs:
           php artisan key:generate --quiet
           php artisan route:cache
 
-      - name: Instalar lftp
-        run: sudo apt-get install -y lftp
+      
+      - name: Deploy via FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_HOST }}
+          username: ${{ secrets.FTP_USER }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          server-dir: ${{ secrets.FTP_PATH }}
+          security: loose
+          timeout: 0
+          retry-count: 25
+          log-level: minimal
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/node_modules/**
+            **/tests/**
+            **/vendor/**
+            .env
+            .env.example
+            instrucao-laravel-demandas.md
+            database/database.sqlite
 
-      - name: Deploy via FTPS porta 990
-        env:
-          FTP_HOST: ${{ secrets.FTP_HOST }}
-          FTP_USER: ${{ secrets.FTP_USER }}
-          FTP_PASS: ${{ secrets.FTP_PASSWORD }}
-          FTP_PATH: ${{ secrets.FTP_PATH }}
-        run: |
-          lftp -c "
-            set ssl:verify-certificate no;
-            set net:reconnect-interval-base 5;
-            set net:reconnect-interval-multiplier 1;
-            set net:max-retries 10;
-            set net:timeout 30;
-            set mirror:parallel-transfer-count 5;
-            open ftps://'$FTP_USER':'$FTP_PASS'@'$FTP_HOST':990;
-            mirror --reverse --delete --verbose=1 \
-              --exclude-glob .git/ \
-              --exclude-glob node_modules/ \
-              --exclude-glob vendor/ \
-              --exclude-glob tests/ \
-              --exclude-glob .env \
-              --exclude-glob .env.example \
-              --exclude-glob database/database.sqlite \
-              --exclude-glob instrucao-laravel-demandas.md \
-              . '$FTP_PATH';
-            bye
-          "
-
-      - name: Executar composer, migrations e cache pós-deploy
+      - name: Executar migrations e cache pós-deploy
         run: |
           curl --fail --silent --show-error \
-            --max-time 120 \
+            --max-time 60 \
             -X POST "${{ secrets.APP_URL }}/deploy/run" \
             -H "X-Deploy-Token: ${{ secrets.DEPLOY_SECRET }}" \
             | tee /dev/stderr | grep -q '"status":"ok"'
