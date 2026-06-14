@@ -58,6 +58,10 @@
                class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium {{ request()->routeIs('configuracoes*') ? 'bg-blue-600 text-white' : 'text-gray-300 hover:bg-gray-800' }}">
                 ⚙️ Configurações
             </a>
+            <a href="{{ route('perfil') }}"
+               class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium {{ request()->routeIs('perfil*') ? 'bg-blue-600 text-white' : 'text-gray-300 hover:bg-gray-800' }}">
+                👤 Meu Perfil
+            </a>
             <form method="POST" action="{{ route('logout') }}">
                 @csrf
                 <button type="submit"

@@ -13,6 +13,7 @@ use App\Http\Controllers\ConfiguracaoController;
 use App\Http\Controllers\DemandaController;
 use App\Http\Controllers\GoogleController;
 use App\Http\Controllers\DeployController;
+use App\Http\Controllers\PerfilController;
 use App\Http\Controllers\WhatsAppController;
 use Illuminate\Support\Facades\Route;
 
@@ -57,6 +58,10 @@ Route::middleware('auth')->group(function () {
     Route::get('recebimentos', [RecebimentoController::class, 'index'])->name('recebimentos');
     Route::post('recebimentos/{demanda}', [RecebimentoController::class, 'store'])->name('recebimentos.store');
     Route::delete('recebimentos/pagamentos/{pagamento}', [RecebimentoController::class, 'destroy'])->name('recebimentos.destroy');
+
+    Route::get('perfil', [PerfilController::class, 'index'])->name('perfil');
+    Route::patch('perfil/email', [PerfilController::class, 'atualizarEmail'])->name('perfil.email');
+    Route::patch('perfil/senha', [PerfilController::class, 'atualizarSenha'])->name('perfil.senha');
 
     Route::get('lembretes', [LembreteController::class, 'index'])->name('lembretes');
     Route::post('lembretes', [LembreteController::class, 'store'])->name('lembretes.store');
