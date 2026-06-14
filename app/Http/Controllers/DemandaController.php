@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\DemandaRequest;
 use App\Models\Demanda;
 use App\Models\Categoria;
+use App\Models\Lembrete;
 use App\Models\Pasta;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
@@ -48,6 +49,7 @@ class DemandaController extends Controller
         $demandas   = $query->get();
         $pastas     = Pasta::orderBy('nome')->get();
         $categorias = Categoria::orderBy('nome')->get();
+        $lembretes  = Lembrete::orderBy('created_at')->get();
 
         // Quando filtro='todos' a coleção já tem tudo — derivar sem queries extras.
         // Nos outros filtros a coleção está recortada, então consultar o banco.
@@ -70,7 +72,7 @@ class DemandaController extends Controller
             ];
         }
 
-        return view('demandas.index', compact('demandas', 'stats', 'filtro', 'pastas', 'categorias'));
+        return view('demandas.index', compact('demandas', 'stats', 'filtro', 'pastas', 'categorias', 'lembretes'));
     }
 
     public function create()

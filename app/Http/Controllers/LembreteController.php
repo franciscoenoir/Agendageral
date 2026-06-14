@@ -27,7 +27,7 @@ class LembreteController extends Controller
 
     public function update(Request $request, Lembrete $lembrete)
     {
-        $lembrete->update($request->only(['texto', 'cor', 'pos_x', 'pos_y']));
+        $lembrete->update($request->only(['texto', 'cor', 'pos_x', 'pos_y', 'quadrante']));
         return response()->json($lembrete);
     }
 
