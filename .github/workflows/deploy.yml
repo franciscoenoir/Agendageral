@@ -52,6 +52,7 @@ jobs:
             --exclude='tests/' \
             --exclude='.env' \
             --exclude='.env.example' \
+            --filter='protect database/database.sqlite' \
             --exclude='database/database.sqlite' \
             --exclude='instrucao-laravel-demandas.md' \
             . ${{ secrets.SSH_USER }}@${{ secrets.SSH_IP }}:~/domains/premiered.com.br/public_html/agenda
