@@ -70,6 +70,15 @@
                     {{ $demanda->status === 'concluido' ? '↩ Reabrir' : '✓ Concluir' }}
                 </button>
             </form>
+            @if($demanda->status !== 'concluido')
+            <form method="POST" action="{{ route('demandas.adiar', $demanda) }}">
+                @csrf @method('PATCH')
+                <button type="submit" title="Adiar prazo em 1 dia"
+                        class="text-xs px-2 py-1 bg-yellow-100 text-yellow-700 rounded hover:bg-yellow-200">
+                    +1d
+                </button>
+            </form>
+            @endif
             <a href="{{ route('demandas.edit', $demanda) }}"
                class="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200">✏️ Editar</a>
             <a href="{{ $demanda->googleCalendarUrl() }}" target="_blank"

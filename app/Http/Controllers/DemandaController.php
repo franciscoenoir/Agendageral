@@ -149,6 +149,12 @@ class DemandaController extends Controller
         return back()->with('success', 'Status atualizado.');
     }
 
+    public function adiar(Demanda $demanda)
+    {
+        $demanda->updateQuietly(['data_limite' => $demanda->data_limite->addDay()]);
+        return back()->with('success', 'Prazo adiado em 1 dia.');
+    }
+
     public function moverPasta(Request $request, Demanda $demanda)
     {
         $demanda->updateQuietly(['pasta_id' => $request->input('pasta_id')]);

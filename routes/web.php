@@ -22,6 +22,7 @@ Route::middleware('auth')->group(function () {
 
     Route::resource('demandas', DemandaController::class);
     Route::patch('demandas/{demanda}/concluir', [DemandaController::class, 'concluir'])->name('demandas.concluir');
+    Route::patch('demandas/{demanda}/adiar', [DemandaController::class, 'adiar'])->name('demandas.adiar');
     Route::get('demandas-pdf', [DemandaController::class, 'exportPdf'])->name('demandas.pdf');
 
     Route::get('agenda', [AgendaController::class, 'index'])->name('agenda');

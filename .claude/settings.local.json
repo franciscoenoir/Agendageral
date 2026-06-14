@@ -25,7 +25,9 @@
       "Bash(git pull *)",
       "Bash(git config *)",
       "Bash(git -C /Users/franciscoenoir/Documents/Projetos/agenda status)",
-      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:8000)"
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:8000)",
+      "Bash(/opt/homebrew/bin/node /opt/homebrew/bin/npm run build)",
+      "Bash(gh pr *)"
     ]
   }
 }
