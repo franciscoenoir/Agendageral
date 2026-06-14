@@ -46,6 +46,7 @@ jobs:
         run: |
           sshpass -e rsync -azP --delete \
             -e "ssh -p ${{ secrets.SSH_PORT }} -o StrictHostKeyChecking=no" \
+            --include='public/build/***' \
             --exclude='.git/' \
             --exclude='node_modules/' \
             --exclude='tests/' \
